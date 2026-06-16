@@ -585,13 +585,14 @@ COLLATE utf8mb4_unicode_ci;
 USE `yudao_his`;
 
 -- =============================================
--- 公共字段说明
--- 所有表均包含以下公共字段：
--- create_time DATETIME 创建时间
--- create_by VARCHAR(50) 创建人
--- update_time DATETIME 更新时间
--- update_by VARCHAR(50) 更新人
--- deleted TINYINT 逻辑删除标识(0正常/1删除)
+-- 通用字段说明（基于 ruoyi-vue-pro 框架规范）
+-- 所有表均包含以下通用字段：
+-- creator VARCHAR(64) DEFAULT '' COMMENT '创建者'
+-- create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
+-- updater VARCHAR(64) DEFAULT '' COMMENT '更新者'
+-- update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+-- deleted BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除'
+-- tenant_id BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号'(多租户表)
 -- =============================================
 ```
 
@@ -635,11 +636,12 @@ CREATE TABLE `his_patient` (
     `photo_url` VARCHAR(200) COMMENT '照片URL',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0禁用/1正常',
     `remark` VARCHAR(500) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识: 0正常/1删除',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_patient_no` (`patient_no`),
     UNIQUE KEY `uk_id_card_no` (`id_card_no`),
@@ -668,11 +670,12 @@ CREATE TABLE `his_allergy` (
     `source` VARCHAR(50) COMMENT '信息来源: 患者自述/医生诊断/家属描述',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0无效/1有效',
     `verify_status` TINYINT DEFAULT 0 COMMENT '验证状态: 0未验证/1已验证',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     KEY `idx_allergy_patient` (`patient_id`),
     KEY `idx_allergen_type` (`allergen_type`),
@@ -712,11 +715,12 @@ CREATE TABLE `op_schedule` (
     `suspend_time` DATETIME COMMENT '停诊时间',
     `suspend_by` VARCHAR(50) COMMENT '停诊操作人',
     `remark` VARCHAR(500) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_schedule` (`doctor_id`, `schedule_date`, `time_period`),
     KEY `idx_schedule_date` (`schedule_date`),
@@ -758,11 +762,12 @@ CREATE TABLE `op_appointment` (
     `cancel_by` VARCHAR(50) COMMENT '取消人',
     `expire_time` DATETIME COMMENT '过期时间',
     `reminder_sent` TINYINT DEFAULT 0 COMMENT '是否已发送提醒: 0否/1是',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_appointment_no` (`appointment_no`),
     KEY `idx_appointment_patient` (`patient_id`),
@@ -820,11 +825,12 @@ CREATE TABLE `op_register` (
     `refund_by` VARCHAR(50) COMMENT '退号操作人',
     `refund_reason` VARCHAR(200) COMMENT '退号原因',
     `remark` VARCHAR(500) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_register_no` (`register_no`),
     KEY `idx_register_patient` (`patient_id`),
@@ -873,11 +879,12 @@ CREATE TABLE `op_prescription` (
     `diagnosis_code` VARCHAR(50) COMMENT '诊断编码(ICD-10)',
     `diagnosis_name` VARCHAR(200) COMMENT '诊断名称',
     `remark` VARCHAR(500) COMMENT '医嘱备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_prescription_no` (`prescription_no`),
     KEY `idx_prescription_register` (`register_id`),
@@ -918,9 +925,12 @@ CREATE TABLE `op_prescription_item` (
     `batch_no` VARCHAR(50) COMMENT '批号',
     `expire_date` DATE COMMENT '有效期',
     `remark` VARCHAR(200) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     KEY `idx_prescription_item_prescription` (`prescription_id`),
     KEY `idx_prescription_item_drug` (`drug_id`),
@@ -980,11 +990,12 @@ CREATE TABLE `his_admission` (
     `is_critical` TINYINT DEFAULT 0 COMMENT '是否危重: 0否/1是',
     `allergy_alert` VARCHAR(500) COMMENT '过敏警示',
     `remark` VARCHAR(500) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_admission_no` (`admission_no`),
     KEY `idx_admission_patient` (`patient_id`),
@@ -1051,11 +1062,12 @@ CREATE TABLE `his_order` (
     `cds_check_result` TEXT COMMENT 'CDS校验结果(JSON)',
     `cds_warning_level` TINYINT COMMENT 'CDS警告级别: 0无/1提示/2警告/3禁止',
     `remark` VARCHAR(500) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_order_no` (`order_no`),
     KEY `idx_order_patient` (`patient_id`),
@@ -1118,11 +1130,12 @@ CREATE TABLE `his_medication_admin` (
     `charge_status` TINYINT DEFAULT 0 COMMENT '记账状态: 0未记账/1已记账',
     `charge_time` DATETIME COMMENT '记账时间',
     `remark` VARCHAR(500) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_admin_no` (`admin_no`),
     KEY `idx_med_admin_patient` (`patient_id`),
@@ -1166,11 +1179,12 @@ CREATE TABLE `his_nursing_record` (
     `audit_status` TINYINT DEFAULT 0 COMMENT '审核状态: 0未审核/1已审核',
     `audit_nurse_id` BIGINT COMMENT '审核护士ID',
     `audit_time` DATETIME COMMENT '审核时间',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     KEY `idx_nursing_record_patient` (`patient_id`),
     KEY `idx_nursing_record_admission` (`admission_id`),
@@ -1211,9 +1225,12 @@ CREATE TABLE `his_vital_sign` (
     `abnormal_flag` TINYINT DEFAULT 0 COMMENT '异常标识: 0正常/1异常',
     `abnormal_items` VARCHAR(200) COMMENT '异常项目',
     `remark` VARCHAR(500) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     KEY `idx_vital_sign_patient` (`patient_id`),
     KEY `idx_vital_sign_admission` (`admission_id`),
@@ -1247,11 +1264,12 @@ CREATE TABLE `his_nursing_assessment` (
     `assessment_time` DATETIME NOT NULL COMMENT '评估时间',
     `next_assessment_time` DATETIME COMMENT '下次评估时间',
     `measure_suggestion` TEXT COMMENT '护理措施建议',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     KEY `idx_nursing_assess_patient` (`patient_id`),
     KEY `idx_nursing_assess_admission` (`admission_id`),
@@ -1286,11 +1304,12 @@ CREATE TABLE `his_bed` (
     `gender_limit` CHAR(1) COMMENT '性别限制: 1男/2女/NULL不限',
     `infection_flag` TINYINT DEFAULT 0 COMMENT '感染标识: 0非感染/1感染',
     `remark` VARCHAR(200) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_bed_no` (`bed_no`),
     KEY `idx_bed_dept` (`dept_id`),
@@ -1334,11 +1353,12 @@ CREATE TABLE `his_drug` (
     `insurance_code` VARCHAR(50) COMMENT '医保编码',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0停用/1正常',
     `remark` VARCHAR(500) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_drug_code` (`drug_code`),
     KEY `idx_drug_name` (`name`),
@@ -1372,11 +1392,12 @@ CREATE TABLE `his_drug_stock` (
     `warning_status` TINYINT DEFAULT 0 COMMENT '预警状态: 0正常/1低库存预警/2超库存预警',
     `last_in_time` DATETIME COMMENT '最后入库时间',
     `last_out_time` DATETIME COMMENT '最后出库时间',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_drug_stock` (`drug_id`, `dept_id`),
     KEY `idx_drug_stock_drug` (`drug_id`),
@@ -1412,11 +1433,12 @@ CREATE TABLE `his_drug_batch` (
     `location` VARCHAR(50) COMMENT '存放位置',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 1正常/2近效期/3过期/4已用完',
     `expire_warning` TINYINT DEFAULT 0 COMMENT '效期预警: 0正常/1近效期(≤90天)',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_drug_batch` (`drug_id`, `batch_no`, `dept_id`),
     KEY `idx_drug_batch_drug` (`drug_id`),
@@ -1450,11 +1472,12 @@ CREATE TABLE `his_drug_interaction` (
     `suggestion` TEXT COMMENT '处置建议',
     `reference` VARCHAR(500) COMMENT '参考文献',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0停用/1正常',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_drug_interaction` (`drug_id_a`, `drug_id_b`),
     KEY `idx_interaction_drug_a` (`drug_id_a`),
@@ -1492,11 +1515,12 @@ CREATE TABLE `his_diagnosis` (
     `dept_id` BIGINT COMMENT '科室ID',
     `dept_name` VARCHAR(100) COMMENT '科室名称',
     `remark` VARCHAR(500) COMMENT '备注',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     KEY `idx_diagnosis_patient` (`patient_id`),
     KEY `idx_diagnosis_admission` (`admission_id`),
@@ -1548,11 +1572,12 @@ CREATE TABLE `his_lab_result` (
     `auditor_id` BIGINT COMMENT '审核医生ID',
     `auditor_name` VARCHAR(50) COMMENT '审核医生姓名',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 1待检/2检验中/3已报告/4已取消',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
-    `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
-    `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted` BIT(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+    `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT '租户编号',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_lab_no` (`lab_no`),
     KEY `idx_lab_result_patient` (`patient_id`),
@@ -1602,9 +1627,9 @@ CREATE TABLE `his_imaging_study` (
     `pacs_url` VARCHAR(200) COMMENT 'PACS访问URL',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 1预约/2检查中/3已报告/4已取消',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_study_no` (`study_no`),
@@ -1661,9 +1686,9 @@ CREATE TABLE `his_charge_detail` (
     `refund_time` DATETIME COMMENT '退费时间',
     `refund_reason` VARCHAR(200) COMMENT '退费原因',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
     PRIMARY KEY (`id`),
     KEY `idx_charge_patient` (`patient_id`),
@@ -1711,9 +1736,9 @@ CREATE TABLE `sys_user` (
     `password_update_time` DATETIME COMMENT '密码修改时间',
     `remark` VARCHAR(500) COMMENT '备注',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_username` (`username`),
@@ -1740,9 +1765,9 @@ CREATE TABLE `sys_role` (
     `sort` INT DEFAULT 0 COMMENT '排序',
     `remark` VARCHAR(500) COMMENT '备注',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_role_code` (`role_code`),
@@ -1773,9 +1798,9 @@ CREATE TABLE `sys_permission` (
     `external` TINYINT DEFAULT 0 COMMENT '是否外链: 0否/1是',
     `remark` VARCHAR(500) COMMENT '备注',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_permission_code` (`permission_code`),
@@ -1796,7 +1821,7 @@ CREATE TABLE `sys_user_role` (
     `user_id` BIGINT NOT NULL COMMENT '用户ID',
     `role_id` BIGINT NOT NULL COMMENT '角色ID',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_user_role` (`user_id`, `role_id`),
     KEY `idx_user_role_user` (`user_id`),
@@ -1817,7 +1842,7 @@ CREATE TABLE `sys_role_permission` (
     `role_id` BIGINT NOT NULL COMMENT '角色ID',
     `permission_id` BIGINT NOT NULL COMMENT '权限ID',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_role_permission` (`role_id`, `permission_id`),
     KEY `idx_role_permission_role` (`role_id`),
@@ -1855,9 +1880,9 @@ CREATE TABLE `sys_dept` (
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0禁用/1正常',
     `remark` VARCHAR(500) COMMENT '备注',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_dept_code` (`dept_code`),
@@ -1880,9 +1905,9 @@ CREATE TABLE `sys_dict_type` (
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0禁用/1正常',
     `remark` VARCHAR(500) COMMENT '备注',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_dict_type` (`dict_type`),
@@ -1909,9 +1934,9 @@ CREATE TABLE `sys_dict_data` (
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0禁用/1正常',
     `remark` VARCHAR(500) COMMENT '备注',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `create_by` VARCHAR(50) NOT NULL COMMENT '创建人',
+    `creator` VARCHAR(64) DEFAULT '' COMMENT '创建者',
     `update_time` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `update_by` VARCHAR(50) COMMENT '更新人',
+    `updater` VARCHAR(64) DEFAULT '' COMMENT '更新者',
     `deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '删除标识',
     PRIMARY KEY (`id`),
     KEY `idx_dict_data_type` (`dict_type`),
@@ -2059,7 +2084,7 @@ spring.shardingsphere.sharding.tables.sys_audit_log.table-strategy.standard.prec
 -- =============================================
 -- 数据字典类型初始化
 -- =============================================
-INSERT INTO `sys_dict_type` (`dict_type`, `dict_name`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_type` (`dict_type`, `dict_name`, `status`, `creator`) VALUES
 ('gender', '性别', 1, 'admin'),
 ('insurance_type', '医保类型', 1, 'admin'),
 ('register_type', '挂号类型', 1, 'admin'),
@@ -2083,26 +2108,26 @@ INSERT INTO `sys_dict_type` (`dict_type`, `dict_name`, `status`, `create_by`) VA
 -- =============================================
 
 -- 性别
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('gender', '男', '1', 1, 1, 'admin'),
 ('gender', '女', '2', 2, 1, 'admin'),
 ('gender', '未知', '9', 3, 1, 'admin');
 
 -- 医保类型
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('insurance_type', '自费', '0', 1, 1, 'admin'),
 ('insurance_type', '城镇职工医保', '1', 2, 1, 'admin'),
 ('insurance_type', '城镇居民医保', '2', 3, 1, 'admin'),
 ('insurance_type', '新农合', '3', 4, 1, 'admin');
 
 -- 挂号类型
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('register_type', '普通号', '1', 1, 1, 'admin'),
 ('register_type', '专家号', '2', 2, 1, 'admin'),
 ('register_type', '急诊号', '3', 3, 1, 'admin');
 
 -- 支付方式
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('pay_type', '现金', '1', 1, 1, 'admin'),
 ('pay_type', '医保', '2', 2, 1, 'admin'),
 ('pay_type', '微信', '3', 3, 1, 'admin'),
@@ -2110,14 +2135,14 @@ INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `s
 ('pay_type', '银行卡', '5', 5, 1, 'admin');
 
 -- 挂号状态
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('register_status', '已挂号', '1', 1, 1, 'admin'),
 ('register_status', '已就诊', '2', 2, 1, 'admin'),
 ('register_status', '已退号', '3', 3, 1, 'admin'),
 ('register_status', '已取消', '4', 4, 1, 'admin');
 
 -- 医嘱类型
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('order_type', '药品医嘱', '1', 1, 1, 'admin'),
 ('order_type', '检查医嘱', '2', 2, 1, 'admin'),
 ('order_type', '检验医嘱', '3', 3, 1, 'admin'),
@@ -2126,12 +2151,12 @@ INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `s
 ('order_type', '其他医嘱', '6', 6, 1, 'admin');
 
 -- 医嘱分类
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('order_category', '长期医嘱', '1', 1, 1, 'admin'),
 ('order_category', '临时医嘱', '2', 2, 1, 'admin');
 
 -- 医嘱状态
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('order_status', '开立', '1', 1, 1, 'admin'),
 ('order_status', '审核', '2', 2, 1, 'admin'),
 ('order_status', '执行中', '3', 3, 1, 'admin'),
@@ -2140,21 +2165,21 @@ INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `s
 ('order_status', '已停止', '6', 6, 1, 'admin');
 
 -- 护理等级
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('nursing_level', '特级护理', '1', 1, 1, 'admin'),
 ('nursing_level', '一级护理', '2', 2, 1, 'admin'),
 ('nursing_level', '二级护理', '3', 3, 1, 'admin'),
 ('nursing_level', '三级护理', '4', 4, 1, 'admin');
 
 -- 急诊分级
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('triage_level', 'I级-濒危', 'I', 1, 1, 'admin'),
 ('triage_level', 'II级-危重', 'II', 2, 1, 'admin'),
 ('triage_level', 'III级-急症', 'III', 3, 1, 'admin'),
 ('triage_level', 'IV级-非急症', 'IV', 4, 1, 'admin');
 
 -- 风险等级
-INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `create_by`) VALUES
+INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `status`, `creator`) VALUES
 ('risk_level', '无风险', '0', 1, 1, 'admin'),
 ('risk_level', '低风险', '1', 2, 1, 'admin'),
 ('risk_level', '中风险', '2', 3, 1, 'admin'),
@@ -2167,7 +2192,7 @@ INSERT INTO `sys_dict_data` (`dict_type`, `dict_label`, `dict_value`, `sort`, `s
 -- =============================================
 -- 角色初始化
 -- =============================================
-INSERT INTO `sys_role` (`role_code`, `role_name`, `role_type`, `data_scope`, `status`, `create_by`) VALUES
+INSERT INTO `sys_role` (`role_code`, `role_name`, `role_type`, `data_scope`, `status`, `creator`) VALUES
 ('SYS_ADMIN', '系统管理员', 1, 1, 1, 'admin'),
 ('OP_DOCTOR', '门诊医生', 2, 3, 1, 'admin'),
 ('IP_DOCTOR', '住院医生', 2, 3, 1, 'admin'),

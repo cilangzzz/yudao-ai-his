@@ -57,39 +57,41 @@
 
 ```json
 {
-  "code": 200,
-  "msg": "操作成功",
-  "data": {},
-  "timestamp": 1718496000000,
-  "traceId": "abc123def456"
+  "code": 0,
+  "msg": "",
+  "data": {}
 }
 ```
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| code | Integer | 业务状态码，200表示成功 |
-| msg | String | 响应消息 |
+| code | Integer | 错误码，0表示成功，非0表示失败 |
+| msg | String | 错误提示，成功时为空字符串 |
 | data | Object | 响应数据，可为对象或数组 |
-| timestamp | Long | 响应时间戳（毫秒） |
-| traceId | String | 链路追踪ID，用于日志追踪 |
+
+> **说明**: 响应格式基于 `CommonResult<T>` 通用返回类，详见 `yudao-common` 模块。
 
 #### 1.4.2 分页响应结构
 
 ```json
 {
-  "code": 200,
-  "msg": "查询成功",
+  "code": 0,
+  "msg": "",
   "data": {
-    "list": [],
     "total": 100,
-    "pageNum": 1,
-    "pageSize": 20,
-    "pages": 5
-  },
-  "timestamp": 1718496000000,
-  "traceId": "abc123def456"
+    "list": []
+  }
 }
 ```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| code | Integer | 错误码，0表示成功 |
+| msg | String | 错误提示 |
+| data.total | Long | 总记录数 |
+| data.list | Array | 数据列表 |
+
+> **说明**: 分页响应基于 `PageResult<T>` 分页结果类，包含 `total` 总量和 `list` 数据列表。
 
 ### 1.5 错误码定义
 
@@ -97,56 +99,64 @@
 
 | 状态码 | 说明 | 使用场景 |
 |--------|------|----------|
-| 200 | 成功 | 请求处理成功 |
-| 201 | 已创建 | POST创建资源成功 |
-| 204 | 无内容 | DELETE删除成功 |
-| 400 | 请求错误 | 参数校验失败 |
-| 401 | 未认证 | 未登录或Token失效 |
-| 403 | 无权限 | 无操作权限 |
-| 404 | 未找到 | 资源不存在 |
-| 409 | 冲突 | 资源状态冲突 |
-| 422 | 业务错误 | 业务规则校验失败 |
-| 429 | 限流 | 请求频率超限 |
-| 500 | 服务器错误 | 系统内部错误 |
-| 503 | 服务不可用 | 服务暂不可用 |
+| 0 | 成功 | 请求处理成功 |
+| 400 | 请求参数不正确 | 参数校验失败 |
+| 401 | 账号未登录 | 未登录或Token失效 |
+| 403 | 没有该操作权限 | 无操作权限 |
+| 404 | 请求未找到 | 资源不存在 |
+| 405 | 请求方法不正确 | HTTP方法错误 |
+| 423 | 请求失败，请稍后重试 | 并发请求冲突 |
+| 429 | 请求过于频繁，请稍后重试 | 请求频率超限 |
+| 500 | 系统异常 | 系统内部错误 |
+| 501 | 功能未实现/未开启 | 功能未实现 |
+| 502 | 错误的配置项 | 配置错误 |
+| 900 | 重复请求，请稍后重试 | 重复请求 |
+| 901 | 演示模式，禁止写操作 | 演示环境限制 |
+| 999 | 未知错误 | 未知错误 |
+
+> **说明**: 全局错误码占用 [0, 999]，详见 `GlobalErrorCodeConstants`。
 
 #### 1.5.2 业务错误码规范
 
-错误码格式：`{模块码}{错误类型}{序号}`
+错误码格式：10位数字，分成四段
 
-| 模块码 | 模块名称 |
-|--------|----------|
-| 01 | 系统管理 |
-| 02 | 门诊管理 |
-| 03 | 住院管理 |
-| 04 | 电子病历 |
-| 05 | 检验管理 |
-| 06 | 影像管理 |
-| 07 | 药品管理 |
-| 08 | 手术麻醉 |
-| 09 | 财务管理 |
+```
+第一段（1位）- 类型：
+    1 - 业务级别异常
 
-| 错误类型 | 编码 | 说明 |
-|----------|------|------|
-| 参数错误 | 01 | 请求参数校验失败 |
-| 业务规则 | 02 | 业务规则校验失败 |
-| 数据冲突 | 03 | 数据状态冲突 |
-| 外部接口 | 04 | 外部接口调用失败 |
-| 权限错误 | 05 | 权限不足 |
+第二段（3位）- 系统类型：
+    001 - 系统管理
+    002 - 门诊管理
+    003 - 住院管理
+    004 - 电子病历
+    005 - 检验管理
+    006 - 影像管理
+    007 - 药品管理
+    008 - 手术麻醉
+    009 - 财务管理
+
+第三段（3位）- 模块：
+    不限制规则，各系统内部定义
+
+第四段（3位）- 错误码：
+    各模块自增
+```
 
 **业务错误码示例：**
 
 | 错误码 | 错误消息 | 说明 |
 |--------|----------|------|
-| 0202001 | 号源已满，无法挂号 | 门诊-挂号-号源不足 |
-| 0202002 | 患者今日已有有效挂号记录 | 门诊-挂号-重复挂号 |
-| 0202003 | 已就诊状态不可退号 | 门诊-挂号-状态冲突 |
-| 0203001 | 预约时间已过，无法取消 | 门诊-预约-时间限制 |
-| 0204001 | 医保身份验证失败 | 门诊-医保-接口错误 |
-| 0302001 | 患者腕带不匹配，停止给药 | 住院-给药-身份校验 |
-| 0302002 | 药品条码不匹配，停止给药 | 住院-给药-药品校验 |
-| 0502001 | 危急值未在规定时间内确认 | 检验-危急值-超时 |
-| 0702001 | 处方存在药物相互作用 | 药品-审核-合理性 |
+| 1002001001 | 号源已满，无法挂号 | 门诊-挂号-号源不足 |
+| 1002001002 | 患者今日已有有效挂号记录 | 门诊-挂号-重复挂号 |
+| 1002001003 | 已就诊状态不可退号 | 门诊-挂号-状态冲突 |
+| 1002002001 | 预约时间已过，无法取消 | 门诊-预约-时间限制 |
+| 1002003001 | 医保身份验证失败 | 门诊-医保-接口错误 |
+| 1003001001 | 患者腕带不匹配，停止给药 | 住院-给药-身份校验 |
+| 1003001002 | 药品条码不匹配，停止给药 | 住院-给药-药品校验 |
+| 1005001001 | 危急值未在规定时间内确认 | 检验-危急值-超时 |
+| 1007001001 | 处方存在药物相互作用 | 药品-审核-合理性 |
+
+> **说明**: 全局错误码占用 [0, 999]，业务异常错误码占用 [1_000_000_000, +∞)。详见 `GlobalErrorCodeConstants` 和 `ServiceErrorCodeRange`。
 
 ### 1.6 请求参数规范
 
@@ -266,8 +276,8 @@ POST /api/v1/op/registers
 
 ```json
 {
-  "code": 200,
-  "msg": "挂号成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "registerId": 10001,
     "registerNo": "GH202606160001",
@@ -283,9 +293,7 @@ POST /api/v1/op/registers
     "personalPay": 70.00,
     "registerTime": "2026-06-16 08:30:00",
     "waitCount": 4
-  },
-  "timestamp": 1718496000000,
-  "traceId": "reg202606160001"
+  }
 }
 ```
 
@@ -311,8 +319,8 @@ GET /api/v1/op/registers/{id}
 
 ```json
 {
-  "code": 200,
-  "msg": "查询成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "registerId": 10001,
     "registerNo": "GH202606160001",
@@ -344,9 +352,7 @@ GET /api/v1/op/registers/{id}
     "isPriority": 0,
     "isMissed": 0,
     "createTime": "2026-06-16 08:30:00"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "query001"
+  }
 }
 ```
 
@@ -376,9 +382,10 @@ GET /api/v1/op/registers
 
 ```json
 {
-  "code": 200,
-  "msg": "查询成功",
+  "code": 0,
+  "msg": "",
   "data": {
+    "total": 100,
     "list": [
       {
         "registerId": 10001,
@@ -391,14 +398,8 @@ GET /api/v1/op/registers
         "registerStatusName": "已挂号",
         "registerTime": "2026-06-16 08:30:00"
       }
-    ],
-    "total": 100,
-    "pageNum": 1,
-    "pageSize": 20,
-    "pages": 5
-  },
-  "timestamp": 1718496000000,
-  "traceId": "list001"
+    ]
+  }
 }
 ```
 
@@ -426,17 +427,15 @@ POST /api/v1/op/registers/{id}/refund
 
 ```json
 {
-  "code": 200,
-  "msg": "退号成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "registerId": 10001,
     "registerNo": "GH202606160001",
     "refundAmount": 70.00,
     "refundTime": "2026-06-16 09:00:00",
     "refundNo": "TF202606160001"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "refund001"
+  }
 }
 ```
 
@@ -468,15 +467,13 @@ PUT /api/v1/op/registers/{id}/visit
 
 ```json
 {
-  "code": 200,
-  "msg": "就诊确认成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "registerId": 10001,
     "registerStatus": 2,
     "visitTime": "2026-06-16 09:30:00"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "visit001"
+  }
 }
 ```
 
@@ -528,8 +525,8 @@ POST /api/v1/op/appointments
 
 ```json
 {
-  "code": 200,
-  "msg": "预约成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "appointmentId": 10001,
     "appointmentNo": "YY202606200001",
@@ -540,9 +537,7 @@ POST /api/v1/op/appointments
     "registerTypeName": "专家号",
     "appointmentStatus": 1,
     "expireTime": "2026-06-20 10:00:00"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "appt001"
+  }
 }
 ```
 
@@ -592,17 +587,15 @@ PUT /api/v1/op/appointments/{id}/checkin
 
 ```json
 {
-  "code": 200,
-  "msg": "签到成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "appointmentId": 10001,
     "appointmentStatus": 2,
     "registerId": 10002,
     "registerNo": "GH202606200001",
     "queueNo": "N001"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "checkin001"
+  }
 }
 ```
 
@@ -622,15 +615,13 @@ PUT /api/v1/op/appointments/{id}/cancel
 
 ```json
 {
-  "code": 200,
-  "msg": "取消成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "appointmentId": 10001,
     "appointmentStatus": 3,
     "cancelTime": "2026-06-19 10:00:00"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "cancel001"
+  }
 }
 ```
 
@@ -661,9 +652,10 @@ GET /api/v1/op/schedules
 
 ```json
 {
-  "code": 200,
-  "msg": "查询成功",
+  "code": 0,
+  "msg": "",
   "data": {
+    "total": 10,
     "list": [
       {
         "scheduleId": 50,
@@ -683,14 +675,8 @@ GET /api/v1/op/schedules
         "scheduleStatus": 1,
         "scheduleStatusName": "正常"
       }
-    ],
-    "total": 10,
-    "pageNum": 1,
-    "pageSize": 20,
-    "pages": 1
-  },
-  "timestamp": 1718496000000,
-  "traceId": "schedule001"
+    ]
+  }
 }
 ```
 
@@ -732,14 +718,12 @@ POST /api/v1/op/schedules
 
 ```json
 {
-  "code": 200,
-  "msg": "创建成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "scheduleId": 55,
     "scheduleNo": "PB20260620001"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "createsch001"
+  }
 }
 ```
 
@@ -781,16 +765,14 @@ PUT /api/v1/op/schedules/{id}/suspend
 
 ```json
 {
-  "code": 200,
-  "msg": "停诊成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "scheduleId": 50,
     "scheduleStatus": 2,
     "affectedPatients": 5,
     "notifyStatus": "已发送"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "suspend001"
+  }
 }
 ```
 
@@ -833,8 +815,8 @@ GET /api/v1/op/triage
 
 ```json
 {
-  "code": 200,
-  "msg": "查询成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "currentPatient": {
       "queueNo": "N001",
@@ -854,9 +836,7 @@ GET /api/v1/op/triage
     ],
     "total": 10,
     "priorityCount": 1
-  },
-  "timestamp": 1718496000000,
-  "traceId": "triage001"
+  }
 }
 ```
 
@@ -912,8 +892,8 @@ POST /api/v1/op/insurance/verify
 
 ```json
 {
-  "code": 200,
-  "msg": "验证成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "insuranceType": "城镇职工医保",
     "insuranceNo": "310100********1234",
@@ -922,9 +902,7 @@ POST /api/v1/op/insurance/verify
     "balance": 1500.00,
     "annualQuota": 5000.00,
     "annualUsed": 3000.00
-  },
-  "timestamp": 1718496000000,
-  "traceId": "ins001"
+  }
 }
 ```
 
@@ -946,8 +924,8 @@ POST /api/v1/op/insurance/pre-settle
 
 ```json
 {
-  "code": 200,
-  "msg": "预结算成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "totalFee": 70.00,
     "insurancePay": 15.00,
@@ -966,9 +944,7 @@ POST /api/v1/op/insurance/pre-settle
         "personalPay": 50.00
       }
     ]
-  },
-  "timestamp": 1718496000000,
-  "traceId": "presettle001"
+  }
 }
 ```
 
@@ -1023,8 +999,8 @@ POST /api/v1/ip/admissions
 
 ```json
 {
-  "code": 200,
-  "msg": "入院登记成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "admissionId": 10001,
     "admissionNo": "ZY202606160001",
@@ -1032,9 +1008,7 @@ POST /api/v1/ip/admissions
     "deptName": "内科一病区",
     "nursingLevel": "二级护理",
     "dietType": "普食"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "admit001"
+  }
 }
 ```
 
@@ -1090,8 +1064,8 @@ POST /api/v1/ip/orders
 
 ```json
 {
-  "code": 200,
-  "msg": "医嘱创建成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "orderId": 10001,
     "orderNo": "YI202606160001",
@@ -1100,9 +1074,7 @@ POST /api/v1/ip/orders
       "passed": true,
       "warnings": []
     }
-  },
-  "timestamp": 1718496000000,
-  "traceId": "order001"
+  }
 }
 ```
 
@@ -1191,8 +1163,8 @@ POST /api/v1/ip/emar/verify-wristband
 
 ```json
 {
-  "code": 200,
-  "msg": "腕带验证通过",
+  "code": 0,
+  "msg": "",
   "data": {
     "matchResult": true,
     "patientName": "张三",
@@ -1205,9 +1177,7 @@ POST /api/v1/ip/emar/verify-wristband
         "frequency": "tid"
       }
     ]
-  },
-  "timestamp": 1718496000000,
-  "traceId": "wristband001"
+  }
 }
 ```
 
@@ -1233,17 +1203,15 @@ POST /api/v1/ip/emar/verify-drug
 
 ```json
 {
-  "code": 200,
-  "msg": "药品验证通过",
+  "code": 0,
+  "msg": "",
   "data": {
     "matchResult": true,
     "drugName": "阿莫西林胶囊",
     "specification": "0.25g*24粒",
     "batchNo": "20260101",
     "expiryDate": "2027-01-01"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "drug001"
+  }
 }
 ```
 
@@ -1272,16 +1240,14 @@ POST /api/v1/ip/emar
 
 ```json
 {
-  "code": 200,
-  "msg": "给药记录成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "emarId": 10001,
     "emarNo": "EMAR202606160001",
     "executeTime": "2026-06-16 09:00:00",
     "nurseName": "王护士"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "emar001"
+  }
 }
 ```
 
@@ -1431,8 +1397,8 @@ POST /api/v1/pharm/audit
 
 ```json
 {
-  "code": 200,
-  "msg": "审核完成",
+  "code": 0,
+  "msg": "",
   "data": {
     "auditId": 10001,
     "auditResult": 1,
@@ -1442,9 +1408,7 @@ POST /api/v1/pharm/audit
       "dosageWarnings": [],
       "passed": true
     }
-  },
-  "timestamp": 1718496000000,
-  "traceId": "audit001"
+  }
 }
 ```
 
@@ -1506,16 +1470,14 @@ POST /api/v1/lis/requests
 
 ```json
 {
-  "code": 200,
-  "msg": "申请成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "requestId": 10001,
     "requestNo": "JY202606160001",
     "specimenBarcode": "BC202606160001",
     "estimatedTime": "2小时"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "request001"
+  }
 }
 ```
 
@@ -1537,8 +1499,8 @@ GET /api/v1/lis/specimen/{barcode}
 
 ```json
 {
-  "code": 200,
-  "msg": "查询成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "specimenId": 10001,
     "specimenBarcode": "BC202606160001",
@@ -1569,9 +1531,7 @@ GET /api/v1/lis/specimen/{barcode}
         "operator": "检验技师B"
       }
     ]
-  },
-  "timestamp": 1718496000000,
-  "traceId": "specimen001"
+  }
 }
 ```
 
@@ -1603,17 +1563,15 @@ POST /api/v1/lis/critical-value
 
 ```json
 {
-  "code": 200,
-  "msg": "危急值上报成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "criticalId": 10001,
     "criticalNo": "WJZ202606160001",
     "notifyTime": "2026-06-16 09:00:00",
     "notifyTarget": "内科 李主任",
     "deadline": "2026-06-16 09:15:00"
-  },
-  "timestamp": 1718496000000,
-  "traceId": "critical001"
+  }
 }
 ```
 
@@ -1636,16 +1594,14 @@ PUT /api/v1/lis/critical-value/{id}/confirm
 
 ```json
 {
-  "code": 200,
-  "msg": "危急值确认成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "criticalId": 10001,
     "confirmTime": "2026-06-16 09:10:00",
     "timeElapsed": "10分钟",
     "status": 2
-  },
-  "timestamp": 1718496000000,
-  "traceId": "confirm001"
+  }
 }
 ```
 
@@ -1750,8 +1706,8 @@ GET /api/v1/sys/permissions
 
 ```json
 {
-  "code": 200,
-  "msg": "查询成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "userId": 1001,
     "username": "zhangsan",
@@ -1782,9 +1738,7 @@ GET /api/v1/sys/permissions
       "scopeName": "本部门",
       "deptIdList": [10]
     }
-  },
-  "timestamp": 1718496000000,
-  "traceId": "perm001"
+  }
 }
 ```
 
@@ -1806,8 +1760,8 @@ GET /api/v1/sys/dict/{type}
 
 ```json
 {
-  "code": 200,
-  "msg": "查询成功",
+  "code": 0,
+  "msg": "",
   "data": [
     {
       "dictValue": "1",
@@ -1819,9 +1773,7 @@ GET /api/v1/sys/dict/{type}
       "dictLabel": "女",
       "dictSort": 2
     }
-  ],
-  "timestamp": 1718496000000,
-  "traceId": "dict001"
+  ]
 }
 ```
 
@@ -1902,8 +1854,8 @@ POST /api/v1/adapter/insurance/{action}
 
 ```json
 {
-  "code": 200,
-  "msg": "调用成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "psnName": "张三",
     "psnCertType": "01",
@@ -1911,9 +1863,7 @@ POST /api/v1/adapter/insurance/{action}
     "insutype": "310",
     "insuOrgCode": "310100",
     "balc": 1500.00
-  },
-  "timestamp": 1718496000000,
-  "traceId": "ins001"
+  }
 }
 ```
 
@@ -2041,8 +1991,8 @@ POST /api/v1/adapter/payment/{channel}
 
 ```json
 {
-  "code": 200,
-  "msg": "支付成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "transactionId": "WX202606160001",
     "payTime": "2026-06-16 08:30:00",
@@ -2098,8 +2048,8 @@ POST /api/v1/adapter/ca/sign
 
 ```json
 {
-  "code": 200,
-  "msg": "签名成功",
+  "code": 0,
+  "msg": "",
   "data": {
     "signatureValue": "MIIB+gY...",
     "signTime": "2026-06-16 10:00:00",
@@ -2225,3 +2175,82 @@ POST /api/v1/adapter/ca/sign
 
 > **编制**: YUDAO-AI-HIS架构组
 > **最后更新**: 2026-06-16
+
+---
+
+## 附录C: 后端响应类参考
+
+本API设计文档的响应格式基于 `yudao-framework` 框架的通用响应类：
+
+### C.1 CommonResult<T> 通用返回类
+
+**源码位置**: `yudao-framework/yudao-common/src/main/java/cn/iocoder/yudao/framework/common/pojo/CommonResult.java`
+
+```java
+@Data
+public class CommonResult<T> implements Serializable {
+    /**
+     * 错误码
+     * @see ErrorCode#getCode()
+     */
+    private Integer code;
+    /**
+     * 错误提示，用户可阅读
+     * @see ErrorCode#getMsg()
+     */
+    private String msg;
+    /**
+     * 返回数据
+     */
+    private T data;
+}
+```
+
+### C.2 PageResult<T> 分页结果类
+
+**源码位置**: `yudao-framework/yudao-common/src/main/java/cn/iocoder/yudao/framework/common/pojo/PageResult.java`
+
+```java
+@Data
+public final class PageResult<T> implements Serializable {
+    @Schema(description = "总量")
+    private Long total;
+
+    @Schema(description = "数据")
+    private List<T> list;
+}
+```
+
+### C.3 GlobalErrorCodeConstants 全局错误码常量
+
+**源码位置**: `yudao-framework/yudao-common/src/main/java/cn/iocoder/yudao/framework/common/exception/enums/GlobalErrorCodeConstants.java`
+
+| 错误码 | 常量名 | 错误提示 |
+|--------|--------|----------|
+| 0 | SUCCESS | 成功 |
+| 400 | BAD_REQUEST | 请求参数不正确 |
+| 401 | UNAUTHORIZED | 账号未登录 |
+| 403 | FORBIDDEN | 没有该操作权限 |
+| 404 | NOT_FOUND | 请求未找到 |
+| 405 | METHOD_NOT_ALLOWED | 请求方法不正确 |
+| 423 | LOCKED | 请求失败，请稍后重试 |
+| 429 | TOO_MANY_REQUESTS | 请求过于频繁，请稍后重试 |
+| 500 | INTERNAL_SERVER_ERROR | 系统异常 |
+| 501 | NOT_IMPLEMENTED | 功能未实现/未开启 |
+| 502 | ERROR_CONFIGURATION | 错误的配置项 |
+| 900 | REPEATED_REQUESTS | 重复请求，请稍后重试 |
+| 901 | DEMO_DENY | 演示模式，禁止写操作 |
+| 999 | UNKNOWN | 未知错误 |
+
+### C.4 ServiceErrorCodeRange 业务错误码区间
+
+**源码位置**: `yudao-framework/yudao-common/src/main/java/cn/iocoder/yudao/framework/common/exception/enums/ServiceErrorCodeRange.java`
+
+业务异常错误码占用 [1_000_000_000, +∞)，采用10位数字分段编码：
+
+```
+第一段（1位）- 类型：1 业务级别异常
+第二段（3位）- 系统类型：001-用户系统, 002-商品系统, ...
+第三段（3位）- 模块：各系统内部定义
+第四段（3位）- 错误码：各模块自增
+```
